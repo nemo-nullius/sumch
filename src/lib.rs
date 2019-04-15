@@ -26,6 +26,10 @@ impl Reholder {
                 re: r"[\u{4E00}-\u{9FA5}\u{9FA6}-\u{9FEF}\u{3400}-\u{4DB5}\u{20000}-\u{2A6D6}\u{2A700}-\u{2B734}\u{2B740}-\u{2B81D}\u{2B820}-\u{2CEA1}\u{2CEB0}-\u{2EBE0}\u{2F00}-\u{2FD5}\u{2E80}-\u{2EF3}\u{F900}-\u{FAD9}\u{2F800}-\u{2FA1D}\u{E815}-\u{E86F}\u{E400}-\u{E5E8}\u{E600}-\u{E6CF}\u{31C0}-\u{31E3}\u{2FF0}-\u{2FFB}\u{3105}-\u{312F}\u{31A0}-\u{31BA}\u{3007}]",
         //r"[\u4E00-\u9FA5\u9FA6-\u9FEF\u3400-\u4DB5\u{20000}-\u{2A6D6}\u{2A700}-\u{2B734}\u{2B740}-\u{2B81D}\u{2B820}-\u{2CEA1}\u{2CEB0}-\u{2EBE0}\u2F00-\u2FD5\u2E80-\u2EF3\uF900-\uFAD9\u{2F800}-\u{2FA1D}\uE815-\uE86F\uE400-\uE5E8\uE600-\uE6CF\u31C0-\u31E3\u2FF0-\u2FFB\u3105-\u312F\u31A0-\u31BA\u3007]"];
             },
+            Reholder {
+                mean: "Punc_Unicode",
+                re: r"[\p{P}]",
+            },
             ]
     }
 }
@@ -77,11 +81,24 @@ mod test {
 
     #[test]
     fn result_mix() {
-        let content = "Good Good Study,
-Day Day Up!
-好好学习，天天向上！
-𪱈𣛧";
+        let content = "Good Good Study,\nDay Day Up!\n好好学习，天天向上！\n𪱈𣛧";
 
-        assert_eq!(vec![39, 6, 10], sum_com(content, &Reholder::new()));
+        assert_eq!(vec![39, 6, 10, 4], sum_com(content, &Reholder::new()));
+    }
+    //#[test]
+    // **IT SEEMS**
+    // In windows: both \n and \r\n are counted as 1
+    // in linux  : both \n and \r\n are counted as 0
+    fn result_mix_win() {
+        let content = "Good Good Study,\r\nDay Day Up!\r\n好好学习，天天向上！\r\n𪱈𣛧";
+
+        //assert_eq!(vec![39, 6, 10], sum_com(content, &Reholder::new()));
+        assert_eq!(vec![42, 6, 10], sum_com(content, &Reholder::new()));
+    }
+    #[test]
+    fn punctuations() {
+        // it seems -+=` are not included
+        let content = r#"a,b?c{d}e[f]g@h#i!你？我；他《哈》……？、“”‘’()（）-+=`"'：；;"#;
+        assert_eq!(vec![47, 9, 4, 31], sum_com(content, &Reholder::new()));
     }
 }
